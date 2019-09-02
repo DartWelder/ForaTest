@@ -9,7 +9,7 @@ export default class SendButton extends React.Component<SendButtonProps> {
     render() {
         const props: SendButtonProps = this.props;
         return (
-            <Material.Button onClick={props.onClick} variant="contained" color="primary" className="send-button">
+            <Material.Button disabled={props.isDisabled} onClick={props.onClick} variant="contained" color="primary" className="send-button">
                 Send
                 <SendIcon className="send-button-icon"></SendIcon>
             </Material.Button>
@@ -21,5 +21,6 @@ export default class SendButton extends React.Component<SendButtonProps> {
 }
 
 export interface SendButtonProps {
-    onClick: () => void
+    onClick: () => void;
+    isDisabled: boolean;
 }

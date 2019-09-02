@@ -1,7 +1,7 @@
 import React, { Component } from 'react/';
 
 import './App.sass';
-import ChatRoom from './chatRoom/ChatRoom';
+import ChatRoom from './components/chatRoom/ChatRoom';
 import MeetDialog from './components/MeetDialog';
 
 class App extends Component<any, AppStateInterface> {
