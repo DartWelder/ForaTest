@@ -1,6 +1,6 @@
 import React, { Component, ChangeEvent } from 'react'
 import * as Material from '@material-ui/core'
-import User from '../../interfaces/User.interface';
+import IUser from '../../classes/User';
 import SendButton from '../sendButton/SendButton';
 import ChatWindow from '../chatWindow/ChatWindow';
 import uuid from 'uuid/v1';
@@ -14,48 +14,47 @@ export default class ChatRoom extends Component<IChatRoomProps, IChatRoomState> 
         super(props)
         this.state = {
             newMessage: '',
-            roomId: uuid(),
+            roomId: 'bffeeb00-cdb5-11e9-9923-7d695a3d0b7e',
             messages: new Array<IMessage>(),
             user: props.user
         }
+        this.getInitialMessages = this.getInitialMessages.bind(this);
     }
 
-    componentWillReceiveProps() {
+    componentDidMount() {
         this.getInitialMessages();
     }
 
-    render() {        
+    render() {
         const isDisabledButton = this.state.newMessage.length === 0;
         return (
             <Material.Container className="chat-room" maxWidth="sm">
                 <div className="chat">
-                    <ChatWindow messages={this.state.messages}/>  
+                    <ChatWindow messages={this.state.messages} user={this.state.user} />
                 </div>
-                <form action="send">
+                <form>
                     <Material.TextField placeholder="Enter your message" value={this.state.newMessage} onChange={this.onChangeHandler} className="chat-input" multiline={true} />
-                    <SendButton isDisabled={isDisabledButton} onClick={this.onSendMessage}/>
+                    <SendButton isDisabled={isDisabledButton} onClick={this.onSendMessage} />
                 </form>
             </Material.Container>
         );
     }
 
-    onSendMessage = () => {      
-        // this.Messages.push({
-        //     user: {name: 'Darth'},
-        //     dateTime: new Date(),
-        //     text: this.state.newMessage,
-        //     id: uuid()
-        // })
+    onSendMessage = () => {
+        Api.socket.on('messageSent', (data: IMessage[]) => {
+            this.setState({ messages: data })
+        });
+
         Api.EmitEvent<IMessage>('addMessage', {
-            user: {name: 'Darth'},
+            user: this.state.user,
             dateTime: new Date(),
             text: this.state.newMessage,
             id: uuid(),
             roomId: this.state.roomId
         })
-        this.setState({ newMessage: ''})
+        this.setState({ newMessage: '' })
     };
-    
+
     onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
         this.setState({
             newMessage: e.target.value
@@ -65,21 +64,21 @@ export default class ChatRoom extends Component<IChatRoomProps, IChatRoomState> 
     getInitialMessages() {
         Api.socket.on('initialMessagesProvided', (data: IMessage[]) => {
             console.log('initialMessagesProvided')
-            this.setState({messages: data});
+            this.setState({ messages: data });
         })
-        Api.EmitEvent('getInitialMessages', this.state.roomId)
+        Api.EmitEvent<string>('getInitialMessages', this.state.roomId)
     }
 }
 
 export interface IChatRoomProps {
-    user: User
+    user: IUser
 }
 
 export interface IChatRoomState {
     newMessage: string;
     roomId: string;
     messages: IMessage[];
-    user: User;
+    user: IUser;
 }
 
 
