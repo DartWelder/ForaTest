@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { RefObject } from 'react';
 import IUser from '../../classes/User';
 import { Avatar, Card, CardHeader, IconButton } from '@material-ui/core';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
@@ -13,26 +13,13 @@ export default function Message(props: IMessageProps) {
                 width: '80%',
                 float: 'left',
                 marginTop: '10px',
-                backgroundColor: 'rgba(255,255,255,0.1)'
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                color: '#fff'
             },
             currentCard: {
                 width: '80%',
                 float: 'right',
                 marginTop: '10px'
-            },
-            media: {
-                height: 0,
-                paddingTop: '56.25%', // 16:9
-            },
-            expand: {
-                transform: 'rotate(0deg)',
-                marginLeft: 'auto',
-                transition: theme.transitions.create('transform', {
-                    duration: theme.transitions.duration.shortest,
-                }),
-            },
-            expandOpen: {
-                transform: 'rotate(180deg)',
             },
             avatar: {
                 backgroundColor: red[500],
@@ -50,11 +37,6 @@ export default function Message(props: IMessageProps) {
                     <Avatar aria-label="recipe" className={classes.avatar}>
                         {props.user.name[0]}
                     </Avatar>
-                }
-                action={ 
-                    <IconButton aria-label="settings">
-                        <MoreVertIcon />
-                    </IconButton>
                 }
                 title={props.user.name}
                 subheader={props.text}

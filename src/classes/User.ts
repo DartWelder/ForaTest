@@ -1,7 +1,7 @@
 import uuid from 'uuid';
 
 export default class User {
-    constructor (user: IUser) {
+    constructor (user: IUser) {        
         this.name = user.name;
         this.userId = user.userId;
         this.isCurrentUser = user.isCurrentUser;
@@ -10,6 +10,8 @@ export default class User {
     public name: string;
     public userId: string;
     public isCurrentUser: boolean;
+
+    static User: User
 
     static GetEmptyObject() :IUser {
         return {

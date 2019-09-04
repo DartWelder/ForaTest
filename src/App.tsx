@@ -1,11 +1,13 @@
 import React, { Component } from 'react/';
 
 import './App.sass';
-import ChatRoom from './components/chatRoom/ChatRoom';
+import ChatRoom, { IChatRoomProps } from './components/chatRoom/ChatRoom';
 import MeetDialog from './components/MeetDialog';
 import IUser from './classes/User';
-import uuid from 'uuid';
 import User from './classes/User';
+import { Route, BrowserRouter, RouteProps, Redirect } from 'react-router-dom';
+import SessionService from './components/SessionService';
+import routes from './routes';
 
 class App extends Component<any, IAppState> {
     constructor(props: any) {
@@ -20,25 +22,39 @@ class App extends Component<any, IAppState> {
         if (!this.state.user.name) {
             return <MeetDialog open={!this.state.user.name} onClose={this.handleClose} selectedValue={this.state.user.name}></MeetDialog>
         }
-        return <div>            
-            <ChatRoom user={this.state.user}></ChatRoom>            
-        </div>;
+        return (
+            <BrowserRouter>
+                {routes.map(({path, component: C, exact})=> {
+                    return (
+                        <Route
+                            path={path}
+                            exact={exact}
+                            render={(props)=> <C user={this.state.user} roomId={props.match.params.id}/>}
+                        />   
+                    )
+                })}
+                {/* <Route
+                    path="/"
+                    exact
+                    render={(props)=> <ChatRoom user={this.state.user} roomId={props.match.params.id}/>}
+                />     
+                <Route
+                    path="/chat/:id"
+                    render={(props)=> <ChatRoom user={this.state.user} roomId={props.match.params.id}/>}
+                />            */}
+                {/* <ChatRoom user={this.state.user}></ChatRoom>             */}
+            </BrowserRouter>
+        )
     };
 
     getUserFromSessionStorage(): IUser {
-        let user = window.sessionStorage.getItem('user');
+        let user = SessionService.GetItem<IUser>('user');
         const emptyUser = User.GetEmptyObject();
 
         if (user === null) {
             return emptyUser;
         }
-        try {
-            const parsedUser = JSON.parse(user);
-            return parsedUser;
-        } catch (error) {
-            return emptyUser;
-        }
-
+        return user;
     }
 
     handleClose(name: string): void {
@@ -49,12 +65,8 @@ class App extends Component<any, IAppState> {
         });
         this.setState((prevState) => ({
             user: {...prevState.user , name: name}
-        }))
-        this.setUserOnSessionStorage(user);
-    }
-    
-    setUserOnSessionStorage(user: IUser): void {
-        window.sessionStorage.setItem('user', JSON.stringify(user));
+        }));
+        SessionService.SetItem('user', JSON.stringify(user));
     }
 }
 
