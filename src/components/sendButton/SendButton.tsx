@@ -1,26 +1,24 @@
-import React, { MouseEventHandler } from 'react'
-import './SendButton.sass';
+import React from 'react'
+import './SendButton.sass'
 
-import {Button} from '@material-ui/core'
-import SendIcon from '@material-ui/icons/Send';
-import { ButtonBaseActions } from '@material-ui/core/ButtonBase';
+import { Button } from '@material-ui/core'
+import SendIcon from '@material-ui/icons/Send'
 
-export default class SendButton extends React.Component<SendButtonProps> {
-    render() {
-        const props: SendButtonProps = this.props;
-        return (
-            <Button type="submit" disabled={props.isDisabled} onSubmit={props.onClick} variant="contained" color="primary" className="send-button">
-                Send
-                <SendIcon className="send-button-icon"></SendIcon>
-            </Button>
-            // <Material.Button color="default" className="chat-button">
-            //     SEND <SendIcon fontSize="small" className="send-button-icon"/> 
-            // </Material.Button>
-        )
-    }
+export default function SendButton(props: ISendButtonProps) {
+    return (
+        <Button 
+            disabled={props.isDisabled} 
+            onClick={props.onClick} 
+            variant="contained" 
+            color="primary" 
+            className="send-button"
+        > Send            
+            <SendIcon className="send-button-icon"></SendIcon>
+        </Button>
+    )
 }
 
-export interface SendButtonProps {
+export interface ISendButtonProps {
     onClick: () => void;
     isDisabled: boolean;
 }

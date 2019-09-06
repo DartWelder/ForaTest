@@ -1,9 +1,9 @@
-import React, { Component, createRef } from 'react'
+import React, { Component, createRef } from 'react';
 import Message, { IMessage } from './Message';
 import * as Material from '@material-ui/core';
 import './chatWindow.sass';
 import IUser from '../../classes/User';
-import Api from '../Api';
+import { INotifications } from '../chatRoom/ChatRoom';
 
 class ChatWindow extends Component<IChatWindowProps, {}> {
     constructor(props: any) {
@@ -16,16 +16,16 @@ class ChatWindow extends Component<IChatWindowProps, {}> {
     }
 
     public messagesEndRef: React.RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
-    
+
     componentWillMount() {
-        this.scrollToBottom()
+        this.scrollToBottom();
     }
-    
+
     componentDidMount() {
-        this.scrollToBottom()
+        this.scrollToBottom();
     }
     componentDidUpdate() {
-        this.scrollToBottom()
+        this.scrollToBottom();
     }
     render() {
         return (
@@ -33,18 +33,20 @@ class ChatWindow extends Component<IChatWindowProps, {}> {
                 <Material.Container maxWidth="sm" >
                     {this.props.messages.map((message, i) => {
                         message.currentUser = this.props.user;
-                        return (<Message key={message.id} {...message} />)
+                        return (<Message key={message.id} {...message} />);
                     })}
+                    {!!this.props.notifications && this.props.notifications.map((n: INotifications) => (
+                        <span className="notification bottom">{n.text}</span>
+                    ))}
                 </Material.Container>                
-                <div className="bottom" ref={this.messagesEndRef}>
-                    {this.props.notification && (<span className="notification">{this.props.notification}</span>)}
-                </div>
+                <div className="bottom" ref={this.messagesEndRef}/>
             </div>
-        )
+        );
     }
 
     scrollToBottom = (): void => {
-        this.messagesEndRef.current && this.messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+        this.messagesEndRef.current 
+        && this.messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
 }
 
@@ -53,5 +55,5 @@ export default ChatWindow;
 export interface IChatWindowProps {
     messages: IMessage[];
     user: IUser;
-    notification?: string;
+    notifications?: INotifications[];
 };

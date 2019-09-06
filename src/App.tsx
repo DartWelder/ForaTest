@@ -1,15 +1,15 @@
 import React, { Component } from 'react/';
 
 import './App.sass';
-import ChatRoom, { IChatRoomProps } from './components/chatRoom/ChatRoom';
 import MeetDialog from './components/MeetDialog';
 import IUser from './classes/User';
 import User from './classes/User';
-import { Route, BrowserRouter, RouteProps, Redirect } from 'react-router-dom';
+import { Route, BrowserRouter } from 'react-router-dom';
 import SessionService from './components/SessionService';
 import routes from './routes';
+import { Container } from '@material-ui/core';
 
-class App extends Component<any, IAppState> {
+export default class App extends Component<any, IAppState> {
     constructor(props: any) {
         super(props);
         this.state = {
@@ -17,34 +17,32 @@ class App extends Component<any, IAppState> {
         };
         this.handleClose = this.handleClose.bind(this);
     }
-    
-    render() {        
+
+    render() {
         if (!this.state.user.name) {
-            return <MeetDialog open={!this.state.user.name} onClose={this.handleClose} selectedValue={this.state.user.name}></MeetDialog>
+            return (
+                <MeetDialog
+                    open={!this.state.user.name}
+                    onClose={this.handleClose}
+                    selectedValue={this.state.user.name}
+                />);
         }
         return (
-            <BrowserRouter>
-                {routes.map(({path, component: C, exact})=> {
-                    return (
-                        <Route
-                            path={path}
-                            exact={exact}
-                            render={(props)=> <C user={this.state.user} roomId={props.match.params.id}/>}
-                        />   
-                    )
-                })}
-                {/* <Route
-                    path="/"
-                    exact
-                    render={(props)=> <ChatRoom user={this.state.user} roomId={props.match.params.id}/>}
-                />     
-                <Route
-                    path="/chat/:id"
-                    render={(props)=> <ChatRoom user={this.state.user} roomId={props.match.params.id}/>}
-                />            */}
-                {/* <ChatRoom user={this.state.user}></ChatRoom>             */}
-            </BrowserRouter>
-        )
+            <Container className="chat-container">
+                <BrowserRouter>
+                    {routes.map(({ path, component: C, exact }, i) => {
+                        return (
+                            <Route
+                                key={i}
+                                path={path}
+                                exact={exact}
+                                render={(props) => <C user={this.state.user} roomId={props.match.params.id} />}
+                            />
+                        )
+                    })}
+                </BrowserRouter>
+            </Container>
+        );
     };
 
     getUserFromSessionStorage(): IUser {
@@ -64,13 +62,11 @@ class App extends Component<any, IAppState> {
             isCurrentUser: false
         });
         this.setState((prevState) => ({
-            user: {...prevState.user , name: name}
+            user: { ...prevState.user, name: name }
         }));
         SessionService.SetItem('user', JSON.stringify(user));
     }
 }
-
-export default App;
 
 export interface IAppState {
     user: User

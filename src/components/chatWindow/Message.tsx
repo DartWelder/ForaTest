@@ -1,8 +1,7 @@
-import React, { RefObject } from 'react';
+import React from 'react';
 import IUser from '../../classes/User';
-import { Avatar, Card, CardHeader, IconButton } from '@material-ui/core';
+import { Avatar, Card, CardHeader } from '@material-ui/core';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { red } from '@material-ui/core/colors';
 import User from '../../classes/User';
 
@@ -27,7 +26,6 @@ export default function Message(props: IMessageProps) {
         }),
     );
 
-
     const classes = useStyles();
     const currentUserId: string = props.currentUser === undefined ? '' : props.currentUser.userId;
     return (
@@ -40,16 +38,14 @@ export default function Message(props: IMessageProps) {
                 }
                 title={props.user.name}
                 subheader={props.text}
+                action={new Date(props.dateTime).toLocaleTimeString()}
             />
         </Card>
-        // <div>
-        //     <span>this.state.user.</span><p>{this.state.text}</p>
-        // </div>
     );
-    }
+}
 
-
-export interface IMessageProps extends IMessage { };
+export interface IMessageProps extends IMessage {
+};
 
 export interface IMessage {
     currentUser?: User;
