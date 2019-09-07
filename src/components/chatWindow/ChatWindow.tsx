@@ -4,6 +4,7 @@ import * as Material from '@material-ui/core';
 import './chatWindow.sass';
 import IUser from '../../classes/User';
 import { INotifications } from '../chatRoom/ChatRoom';
+import uuid from 'uuid';
 
 class ChatWindow extends Component<IChatWindowProps, {}> {
     constructor(props: any) {
@@ -17,10 +18,6 @@ class ChatWindow extends Component<IChatWindowProps, {}> {
 
     public messagesEndRef: React.RefObject<HTMLDivElement> = createRef<HTMLDivElement>();
 
-    componentWillMount() {
-        this.scrollToBottom();
-    }
-
     componentDidMount() {
         this.scrollToBottom();
     }
@@ -31,22 +28,26 @@ class ChatWindow extends Component<IChatWindowProps, {}> {
         return (
             <div className="chat">
                 <Material.Container maxWidth="sm" >
-                    {this.props.messages.map((message, i) => {
+                    {this.props.messages.map((message) => {
                         message.currentUser = this.props.user;
                         return (<Message key={message.id} {...message} />);
                     })}
-                    {!!this.props.notifications && this.props.notifications.map((n: INotifications) => (
-                        <span className="notification bottom">{n.text}</span>
-                    ))}
-                </Material.Container>                
-                <div className="bottom" ref={this.messagesEndRef}/>
+                    <div className="bottom">
+                        {!!this.props.notifications && this.props.notifications.map((n: INotifications) => (
+                            <div key={uuid()} >
+                                <span className="notification">{n.text}</span><br />
+                            </div>
+                        ))}
+                    </div>
+                </Material.Container>
+                <div className="bottom" ref={this.messagesEndRef} />
             </div>
         );
     }
 
     scrollToBottom = (): void => {
-        this.messagesEndRef.current 
-        && this.messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        this.messagesEndRef.current
+            && this.messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
 }
 

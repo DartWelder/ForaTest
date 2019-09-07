@@ -1,5 +1,7 @@
 import React, { Component, ChangeEvent } from 'react';
-import { Container, TextField } from '@material-ui/core';
+import { Container, TextField, Chip, Avatar} from '@material-ui/core';
+import Button from '@material-ui/core/Button'; 
+import { Send } from '@material-ui/icons';
 import IUser from '../../classes/User';
 import SendButton from '../sendButton/SendButton';
 import ChatWindow from '../chatWindow/ChatWindow';
@@ -20,7 +22,8 @@ export default class ChatRoom extends Component<IChatRoomProps, IChatRoomState> 
             messages: new Array<IMessage>(),
             user: props.user,
             notifications: [],
-            roomExist: true
+            roomExist: true,
+            usersInChat: new Array<IUser>()
         }
         this.getInitialMessages = this.getInitialMessages.bind(this);
     }
@@ -31,23 +34,44 @@ export default class ChatRoom extends Component<IChatRoomProps, IChatRoomState> 
         this.setListeners();
         this.getInitialMessages();
         fetch(`${Constants.backEndURL}/getrooms`, { signal: this.abortController.signal })
-        // It works, but I don't know - how to handle .json() call witj abort controller.
             .then((res) => res.json())
             .then((data) => {
                 this.setState({
                     roomExist: data.some((room: string) => {
                         return this.props.roomId === room;
                     })
-                })
+                });
             })
             .catch((err) => {
                 if (err === 'AbortError') return;
                 console.log(`Error: ${err}`);
             })
-    }    
+
+        Api.EmitEvent<IChatRoomProps>('userIsJoinedToRoom', {
+            user: this.state.user,
+            roomId: this.state.roomId
+        });
+        window.addEventListener('unload', () => {
+            Api.EmitEvent<IChatRoomProps>('userIsLeavingRoom', {
+                user: this.state.user,
+                roomId: this.state.roomId
+            });
+            return true;
+        })
+    }
 
     componentWillUnmount() {
         this.abortController.abort();
+        Api.stopSocketListening([
+            'initialMessagesProvided',
+            'messageSent',
+            `notification-${this.state.roomId}`,
+            `userOnline-${this.state.roomId}`
+        ]);
+        Api.EmitEvent<IChatRoomProps>('userIsLeavingRoom', {
+            user: this.state.user,
+            roomId: this.state.roomId
+        });
     }
 
     render() {
@@ -57,7 +81,21 @@ export default class ChatRoom extends Component<IChatRoomProps, IChatRoomState> 
         }
         return (
             <Container className="chat-room" maxWidth="sm">
-                <Link to="/" style={{textDecoration: 'none'}}>Go to Chats</Link>
+                <Button component={Link} to="/">Go to Chats</Button>
+                {this.state.usersInChat.map((user: IUser) => {
+                    return (
+                        <Chip
+                            key={uuid()}
+                            avatar={<Avatar>{user.name[0]}</Avatar>}
+                            label={user.name}
+                            clickable
+                            // className={classes.chip}
+                            color="primary"
+                            // onDelete={handleDelete}
+                            deleteIcon={<Send />}
+                        />
+                    )
+                })}
                 <ChatWindow {...this.state} />
                 <form action="submit">
                     <TextField
@@ -104,13 +142,19 @@ export default class ChatRoom extends Component<IChatRoomProps, IChatRoomState> 
         });
     }
 
-    getInitialMessages() {
+    getInitialMessages = () => {
         Api.EmitEvent<string>('getInitialMessages', this.state.roomId)
     }
 
     setListeners = () => {
         Api.socket.on('initialMessagesProvided', (data: IMessage[]) => {
             this.setState({ messages: data });
+        })
+        Api.socket.on('messageSent', (data: IMessage[]) => {
+            this.setState({ messages: data })
+        });
+        Api.socket.on(`userOnline-${this.state.roomId}`, (data: IUser[]) => {
+            this.setState({ usersInChat: data });
         })
         Api.socket.on(`notification-${this.state.roomId}`, (notification: INotificationData): void => {
             switch (notification.type) {
@@ -123,8 +167,7 @@ export default class ChatRoom extends Component<IChatRoomProps, IChatRoomState> 
                         }
 
                         const notifications: INotifications[] = this.state.notifications.filter((n) => {
-                            return n.type !== newNotification.type
-                                && n.user.userId !== newNotification.user.userId
+                            return n.user.userId !== newNotification.user.userId
                         })
 
                         this.setState({
@@ -145,11 +188,7 @@ export default class ChatRoom extends Component<IChatRoomProps, IChatRoomState> 
                     break;
             }
 
-        })
-
-        Api.socket.on('messageSent', (data: IMessage[]) => {
-            this.setState({ messages: data })
-        })
+        });
     }
 }
 
@@ -165,6 +204,7 @@ export interface IChatRoomState {
     user: IUser;
     notifications: INotifications[]
     roomExist: boolean;
+    usersInChat: IUser[]
 }
 
 export interface INotifications {

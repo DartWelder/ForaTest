@@ -3,6 +3,7 @@ import ChatThumbnail from '../chatThumbnail/ChatThumbnail';
 import { Container, Button } from '@material-ui/core';
 import './lobby.sass';
 import { Constants } from '../../constats';
+import { IUser } from '../../classes/User';
 
 export default class Lobby extends Component<any, ILobbyState> {
     constructor(props: any) {
@@ -13,15 +14,22 @@ export default class Lobby extends Component<any, ILobbyState> {
         }
     }
 
+    abortController = new AbortController();
+
     componentDidMount() {
-        fetch(`${Constants.backEndURL}/getrooms`)
+        fetch(`${Constants.backEndURL}/getrooms`, {signal: this.abortController.signal})
             .then((res) => res.json())
             .then((data) => {
-                this.setRoomsOnState(data)
+                this.setRoomsOnState(data);
             })
             .catch((err) => {
+                if (err === 'AbortError') return;
                 console.log(`Error: ${err}`)
             });
+    }
+
+    componentWillUnmount() {
+        this.abortController.abort();
     }
 
     render() {
@@ -40,13 +48,15 @@ export default class Lobby extends Component<any, ILobbyState> {
 
     onAddClickHandler = () => {
         fetch(`${Constants.backEndURL}/createroom`, {
-            method: 'POST'
+            method: 'POST', 
+            signal: this.abortController.signal
         })
             .then((res) => res.json())
             .then((data) => {
                 this.setRoomsOnState(data)
             })
             .catch((err) => {
+                if (err === 'AbortError') return;
                 console.log(`Error: ${err}`)
             });
     }
@@ -60,4 +70,9 @@ export default class Lobby extends Component<any, ILobbyState> {
 
 export interface ILobbyState {
     roomIds: string[]
+}
+
+export interface IRoomsList {
+    users: IUser[],
+    messages: string[]
 }

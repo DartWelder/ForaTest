@@ -1,9 +1,8 @@
 import React from 'react';
-import { Card, CardHeader } from '@material-ui/core';
-import InsertCommentIcon from '@material-ui/icons/InsertComment';
+import { Card, CardHeader, Fab } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/Edit';
 import { Link } from 'react-router-dom';
 import './chatThumbnail.sass';
-
 
 export default function ChatThumbnail(props: IChatThumbnailProps) {
     const id = props.id
@@ -12,10 +11,10 @@ export default function ChatThumbnail(props: IChatThumbnailProps) {
             <CardHeader
                 title={`Chat #${id}`}
                 subheader="ssss"
-                action={
-                    <Link to={`/chat/${props.id}`}>
-                        <InsertCommentIcon />
-                    </Link>
+                action={                    
+                    <Fab component={Link} to={`/chat/${props.id}`}>
+                        <EditIcon />
+                    </Fab>
                 }
             />
         </Card>
