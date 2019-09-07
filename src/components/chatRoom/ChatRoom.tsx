@@ -81,7 +81,7 @@ export default class ChatRoom extends Component<IChatRoomProps, IChatRoomState> 
         }
         return (
             <Container className="chat-room" maxWidth="sm">
-                <Button component={Link} to="/">Go to Chats</Button>
+                <Button className="lobby-button" component={Link} to="/">Go to Chats</Button>
                 {this.state.usersInChat.map((user: IUser) => {
                     return (
                         <Chip
